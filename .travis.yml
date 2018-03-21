@@ -1,0 +1,14 @@
+sudo: false
+language: elixir
+elixir:
+  - 1.6
+otp_release:
+  - 20.0
+env:
+  - MIX_ENV=test
+script:
+  - mix do deps.get, eqc.install --mini
+  - mix test
+notifications:
+  email:
+    - paulschoenfelder@gmail.com
