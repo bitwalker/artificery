@@ -41,38 +41,38 @@ defmodule Artificery.Console do
   Prints a debug message, only visible when verbose mode is on
   """
   @spec debug(String.t()) :: :ok
-  def debug(msg), do: log(:debug, colorize("==> #{msg}", [:cyan]))
+  def debug(msg), do: log(:standard_error, :debug, colorize("==> #{msg}", [:cyan]))
 
   @doc """
   Prints an info message
   """
   @spec info(String.t()) :: :ok
-  def info(msg), do: log(:info, msg)
+  def info(msg), do: log(:stdio, :info, msg)
 
   @doc """
   Prints a notice
   """
   @spec notice(String.t()) :: :ok
-  def notice(msg), do: log(:info, colorize(msg, [:bright, :blue]))
+  def notice(msg), do: log(:stdio, :info, colorize(msg, [:bright, :blue]))
 
   @doc """
   Prints a success message
   """
   @spec success(String.t()) :: :ok
-  def success(msg), do: log(:warn, colorize(msg, [:bright, :green]))
+  def success(msg), do: log(:stdio, :warn, colorize(msg, [:bright, :green]))
 
   @doc """
   Prints a warning message
   """
   @spec warn(String.t()) :: :ok
-  def warn(msg), do: log(:warn, colorize(msg, [:yellow]))
+  def warn(msg), do: log(:standard_error, :warn, colorize(msg, [:yellow]))
 
   @doc """
   Prints an error message, and then halts the process
   """
   @spec error(String.t()) :: no_return
   def error(msg) do
-    log(:error, colorize(bangify(msg), [:red]))
+    log(:standard_error, :error, colorize(bangify(msg), [:red]))
     halt(1)
   end
 
@@ -127,10 +127,11 @@ defmodule Artificery.Console do
     end
   end
 
-  defp log(level, msg), do: log(level, get_verbosity(), msg)
-  defp log(_, :debug, msg), do: IO.puts(msg)
-  defp log(:debug, :info, _msg), do: :ok
-  defp log(_, _, msg), do: IO.puts(msg)
+
+  defp log(device, level, msg), do: log(device, level, get_verbosity(), msg)
+  defp log(device, _, :debug, msg), do: IO.write(device, [msg, ?\n])
+  defp log(_device, :debug, :info, _msg), do: :ok
+  defp log(device, _, _, msg), do: IO.write(device, [msg, ?\n])
 
   defp colorize(msg, styles) when is_list(styles), do: __MODULE__.Color.style(msg, styles)
 
