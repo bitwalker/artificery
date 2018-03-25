@@ -229,6 +229,78 @@ You can either return `{:ok, options}` or raise an error, there are no other cho
 allows you to extend or filter `options`, handle additional arguments in `argv`, or take action based
 on the current command.
 
+## Writing Output / Logging
+
+Artificery provides a `Console` module which contains a number of functions for logging or writing output
+to standard out/standard error. A list of basic functions it provides is below:
+
+- `configure/1`, takes a list of options which configures the logger, currently the only option is `:verbosity`
+- `debug/1`, writes a debug message to stderr (colored cyan if terminal supports color)
+- `info/1`, writes an info message to stdout (no color)
+- `notice/1`, writes an informatinal notice to stdout (bright blue)
+- `success/1`, writes a success message to stdout (bright green)
+- `warn/1`, writes a warning to stderr (yellow)
+- `error/1`, writes an error to stderr (red), and also halts/terminates the process with a non-zero exit code
+
+In addition to writing messages to the terminal, `Console` also provides a way to provide a spinner/loading animation
+while some long-running work is being performed, also supporting the ability to update the message with progress information.
+
+The following example shows a trivial example of progress, by simply reading from a file in a loop, updating the status
+of the spinner while it reads. There are obviously cleaner ways of writing this, but hopefully it is clear what the capabilities are.
+
+```elixir
+def load_data(_argv, %{path: path}) do
+  alias Artificery.Console
+  
+  unless File.exists?(path) do
+    Console.error "No such file: #{path}"
+  end
+  
+  # A state machine defined as a recursive anonymous function
+  # Each state updates the spinner status and is reflected in the console
+  loader = fn 
+    :opening, _size, _bytes_read, _file, loader ->
+      Console.update_spinner("opening #{path}")
+      %{size: size} = File.stat!(path)
+      loader.(:reading, size, 0, File.open!(path), loader)
+
+    :reading, size, bytes_read, file, loader ->
+      progress = Float.round((size / bytes_read) * 100)
+      Console.update_spinner("reading..#{progress}%")
+      case IO.read(file) do
+        :eof ->
+          loader.(:done, size, bytes_read, file, loader)
+
+        {:error, _reason} = err ->
+          Console.update_spinner("read error!")
+          File.close!(file)
+          err
+
+        new_data ->
+          loader.(:reading, size, byte_size(new_data), file, loader)
+      end
+
+    :done, size, bytes_read, file, loader ->
+      Console.update_spinner("done! (total bytes read #{bytes_read})")
+      File.close!(file)
+      :ok
+  end
+
+  results =
+    Console.spinner "Loading data.." do
+      loader.(:opening, 0, 0, nil, loader)
+    end
+
+  case results do
+    {:error, reason} ->
+      Console.error "Failed to load data from #{path}: #{inspect reason}"
+
+    :ok ->
+      Console.success "Load complete!"
+  end
+end
+```
+
 ## Producing An Escript
 
 To use your newly created CLI as an escript, simply add the following to your `mix.exs`:
@@ -259,6 +331,7 @@ If you want to define the CLI as part of a larger application, and consume it vi
 very straightforward to do. You'll need to define a custom command and add it to your release configuration:
 
 ```elixir
+
 # rel/config.exs
 
 release :myapp do
