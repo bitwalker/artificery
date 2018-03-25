@@ -51,9 +51,15 @@ defmodule Artificery.Console.Spinner do
 
   ## Public API
 
+  def start(), do: start(GenServer.whereis(__MODULE__))
   def start(pid), do: GenServer.call(pid, :start, :infinity)
 
-  def stop(pid, status \\ "done!") do
+  def stop(), do: stop(GenServer.whereis(__MODULE__), "done!")
+  def stop(status) when is_binary(status) do
+    stop(GenServer.whereis(__MODULE__), status)
+  end
+  def stop(pid) when is_pid(pid), do: stop(pid, "done!")
+  def stop(pid, status) when is_pid(pid) do
     ref = Process.monitor(pid)
     GenServer.cast(pid, {:stop, status})
     receive do
@@ -62,11 +68,19 @@ defmodule Artificery.Console.Spinner do
     end
   end
 
+  def status(text), do: GenServer.cast(__MODULE__, {:status, text})
   def status(pid, text), do: GenServer.cast(pid, {:status, text})
 
   ## GenServer impl
 
-  def start_link(opts), do: GenServer.start_link(__MODULE__, [opts])
+  def start_link(opts) do
+    case Keyword.get(opts, :name) do
+      nil ->
+        GenServer.start_link(__MODULE__, [opts], name: __MODULE__)
+      name ->
+        GenServer.start_link(__MODULE__, [opts], name: name)
+    end
+  end
 
   def init([opts]) do
     spinner = opt_spinner(opts)

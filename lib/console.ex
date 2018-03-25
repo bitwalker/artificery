@@ -127,6 +127,19 @@ defmodule Artificery.Console do
     end
   end
 
+  @doc """
+  Updates a running spinner with the provided status text
+  """
+  @spec update_spinner(String.t) :: :ok
+  def update_spinner(status) when is_binary(status) do
+    Artificery.Console.Spinner.status(status)
+  end
+
+  # Used for tests
+  @doc false
+  def update_spinner(spinner, status) do
+    Artificery.Console.Spinner.status(spinner, status)
+  end
 
   defp log(device, level, msg), do: log(device, level, get_verbosity(), msg)
   defp log(device, _, :debug, msg), do: IO.write(device, [msg, ?\n])
