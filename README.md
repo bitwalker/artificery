@@ -301,6 +301,31 @@ def load_data(_argv, %{path: path}) do
 end
 ```
 
+## Handling Input
+
+Artificery exposes some functions for working with interactive user sessions:
+
+- `yes?/1`, asks the user a question and expects a yes/no response, returns a boolean
+- `ask/2`, queries the user for information they need to provide
+
+### Example
+
+Let's shoot for a slightly more amped up `hello` command:
+
+```elixir
+def hello(_argv, _opts) do
+  name = Console.ask "What is your name?", validator: &is_valid_name/1
+  Console.success "Hello #{name}!"
+end
+
+defp is_valid_name(name) when byte_size(name) > 1, do: :ok
+defp is_valid_name(_), do: {:error, "You must tell me your name or I can't greet you!"}
+```
+
+The above will accept any name more than one character in length, obviously not super robust, but the general idea is shown here.
+The `ask` function also supports transforming responses, and providing defaults in the case where you want to accept blank answers.
+Check the docs for more information!
+
 ## Producing An Escript
 
 To use your newly created CLI as an escript, simply add the following to your `mix.exs`:

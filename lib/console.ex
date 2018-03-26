@@ -36,6 +36,53 @@ defmodule Artificery.Console do
   end
 
   @doc """
+  Ask the user a question which requires a yes/no answer, returns a boolean
+  """
+  defdelegate yes?(question), to: __MODULE__.Prompt
+
+  @doc """
+  Ask the user to provide data in response to a question
+
+  The value returned is dependent on whether a transformation is applied,
+  and whether blank answers are accepted. By default, empty strings will
+  return nil if no alternate default is supplied and either no validator
+  was supplied, or it returned `:ok` for blank answers.
+
+  If you supply a default, instead of nil, the default will be returned.
+  Again this only applies if a blank answer is considered valid.
+
+  You may validate answers by supplying a function (bound or captured) via
+  the `validator: fun` option. This function will receive the raw input string
+  supplied by the user, and should return `:ok` if the answer is valid, or
+  `{:error, validation_error}`, where `validation_error` is a string which will
+  be displayed to the user before asking them to answer the question again.
+
+  You may apply a transformation to answers, so that rather than getting a
+  string back, you get the value in a state useful for your application. You may
+  provide a transform via the `transform: fun` option, and this will receive the
+  raw input string the user provided _after_ the validator has validated the input,
+  if one was supplied, and if the user input was non-nil.
+
+  Supply default values with the `default: term` option
+  """
+  defdelegate ask(question, opts \\ []), to: __MODULE__.Prompt
+
+  @doc """
+  Write text or iodata to standard output.
+
+  You may optionally pass a list of styles to apply to the output, as well
+  as the device to write to (:standard_error, or :stdio)
+  """
+  @spec write(iodata) :: :ok
+  @spec write(iodata, [atom]) :: :ok
+  @spec write(:standard_error | :stdio, iodata, [atom]) :: :ok
+  def write(msg), do: write(:stdio, msg, [])
+  def write(msg, styles) when is_list(styles), do: write(:stdio, msg, styles)
+  def write(device, msg, styles) when is_list(styles) do
+    IO.write(device, Artificery.Console.Color.style(msg, styles))
+  end
+
+  @doc """
   Prints a debug message, only visible when verbose mode is on
   """
   @spec debug(String.t()) :: :ok

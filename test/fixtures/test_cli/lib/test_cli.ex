@@ -39,6 +39,8 @@ defmodule TestCli do
     end
   end
 
+  command :ask, "Asks a question"
+
   def hello(_argv, %{name: name}) do
     Console.notice "Hello #{name}!"
   end
@@ -51,6 +53,17 @@ defmodule TestCli do
     Console.spinner "Loading...", [spinner: spinner] do
       :timer.sleep(3_000)
     end
+  end
+
+  def ask(_argv, _opts) do
+    is_phone_number = fn s -> 
+      if String.match?(s, ~r/^[\d]{3}-[\d]{3}-[\d]{4}$/) do
+        :ok
+      else
+        {:error, "Invalid phone number, must be in XXX-XXX-XXXX form!"}
+      end
+    end
+    Console.Prompt.ask("What is your phone number", validator: is_phone_number)
   end
 
   def keys(_argv, %{file: file}) do
