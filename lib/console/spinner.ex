@@ -3,6 +3,13 @@ defmodule Artificery.Console.Spinner do
 
   alias Artificery.Console.Color.ANSI
 
+  @esc "\u001B["
+  @cursor_left @esc <> "G"
+  @cursor_hide @esc <> "?25l"
+  @cursor_show @esc <> "?25h"
+  @erase_line @esc <> "2K"
+  @erase_down @esc <> "J"
+
   @spinners %{
     bouncing_bar: %{
       interval: 80,
@@ -37,13 +44,6 @@ defmodule Artificery.Console.Spinner do
     simple_dots_scrolling: %{interval: 200, frames: [".  ", ".. ", "...", " ..", "  .", "   "]},
     fancy_dots: %{interval: 80, frames: ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"]},
   }
-
-  @esc "\u001B["
-  @cursor_left @esc <> "G"
-  @cursor_hide @esc <> "?25l"
-  @cursor_show @esc <> "?25h"
-  @erase_line @esc <> "2K"
-  @erase_down @esc <> "J"
 
   use GenServer
 
@@ -146,7 +146,7 @@ defmodule Artificery.Console.Spinner do
     data
   end
   defp clear(%{output: output} = data) do
-    IO.write [cursor_up(lines(output)), @erase_down]
+    IO.write [Artificery.Console.cursor_up(lines(output)), @erase_down]
     data
   end
 
@@ -191,9 +191,5 @@ defmodule Artificery.Console.Spinner do
     stream = Keyword.get(opts, :stream, :standard_error)
     isatty? = stream in [:stdio, :standard_error]
     supported? and isatty?
-  end
-
-  defp cursor_up(count) do
-    @esc <> "#{count}A"
   end
 end

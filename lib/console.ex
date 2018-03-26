@@ -3,28 +3,26 @@ defmodule Artificery.Console do
 
   alias __MODULE__.Events
 
-  @doc """
-  Initializes the logger configuration
-  """
-  @spec init() :: :ok
-  def init do
-    # For logger state
-    :ets.new(__MODULE__, [:public, :set, :named_table])
-    # Start listening for console events
-    Events.start
-    :ok
-  end
+  @esc "\u001B["
+  @cursor_left @esc <> "G"
+  @cursor_hide @esc <> "?25l"
+  @cursor_show @esc <> "?25h"
+  @erase_line @esc <> "2K"
+  #@erase_down @esc <> "J"
 
   @doc """
-  Gets the current width of the terminal in columns
+  Terminates the process with the given status code
   """
-  @spec width() :: non_neg_integer
-  def width do
-    case :io.columns() do
-      {:error, :enotsup} -> 80
-      {:ok, cols} when cols < 30 -> 30
-      {:ok, cols} -> cols
-    end
+  @spec halt(non_neg_integer) :: no_return
+  def halt(code)
+
+  if Mix.env == :test do
+    # During tests we don't want to kill the node process,
+    # exit the test process instead
+    def halt(0), do: :ok
+    def halt(code) when code >= 0, do: exit({:halt, code})
+  else
+    def halt(code) when code >= 0, do: System.halt(code)
   end
 
   @doc """
@@ -141,6 +139,51 @@ defmodule Artificery.Console do
     Artificery.Console.Spinner.status(spinner, status)
   end
 
+  @doc false
+  def show_cursor(), do: IO.write([@cursor_show])
+
+  @doc false
+  def hide_cursor(), do: IO.write([@cursor_hide])
+
+  # Move the cursor up the screen by `n` lines
+  @doc false
+  def cursor_up(n), do: IO.write([@esc, "#{n}A"])
+
+  # Move the cursor down the screen by `n` lines
+  @doc false
+  def cursor_down(n), do: IO.write([@esc, "#{n}B"])
+
+  # Move the cursor right on the screen by `n` columns
+  @doc false
+  def cursor_forward(n), do: IO.write([@esc, "#{n}C"])
+
+  # Move the cursor left on the screen by `n` columns
+  @doc false
+  def cursor_backward(n), do: IO.write([@esc, "#{n}D"])
+
+  # Move the cursor to the next line
+  @doc false
+  def cursor_next_line, do: IO.write([@esc, "E"])
+
+  # Move the cursor to the previous line
+  @doc false
+  def cursor_prev_line, do: IO.write([@esc, "F"])
+
+  # Erases the current line, placing the cursor at the beginning
+  @doc false
+  def erase_line, do: IO.write([@cursor_left, @erase_line])
+
+  # Erases `n` lines starting at the current line and going up the screen
+  @doc false
+  def erase_lines(0), do: ""
+  def erase_lines(n) when is_integer(n) do
+    erase_line()
+    if (n - 1) > 0 do
+      cursor_up(1)
+    end
+    erase_lines(n - 1)
+  end
+
   defp log(device, level, msg), do: log(device, level, get_verbosity(), msg)
   defp log(device, _, :debug, msg), do: IO.write(device, [msg, ?\n])
   defp log(_device, :debug, :info, _msg), do: :ok
@@ -151,12 +194,6 @@ defmodule Artificery.Console do
   defp get_verbosity(), do: get_verbosity(:ets.lookup(__MODULE__, :level))
   defp get_verbosity([]), do: :info
   defp get_verbosity([{_, v}]), do: v
-
-  if Mix.env == :test do
-    defp halt(code), do: exit({:halt, code})
-  else
-    defp halt(code), do: System.halt(code)
-  end
 
   defp arrow do
     case :os.type() do
@@ -173,5 +210,25 @@ defmodule Artificery.Console do
       [c, ?\s, ?\s, line]
     end
     Enum.join(lines, "\n")
+  end
+
+  @doc false
+  @spec init() :: :ok
+  def init do
+    # For logger state
+    :ets.new(__MODULE__, [:public, :set, :named_table])
+    # Start listening for console events
+    Events.start
+    :ok
+  end
+
+  @doc false
+  @spec width() :: non_neg_integer
+  def width do
+    case :io.columns() do
+      {:error, :enotsup} -> 80
+      {:ok, cols} when cols < 30 -> 30
+      {:ok, cols} -> cols
+    end
   end
 end

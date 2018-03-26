@@ -44,14 +44,6 @@ defmodule Artificery.Entry do
         parse_args(argv)
       end
 
-      if Mix.env == :test do
-        # Halt can't kill the node, so crash noisily instead
-        defp halt(0), do: :ok
-        defp halt(code), do: exit({:halt, code})
-      else
-        defp halt(code), do: System.halt(code)
-      end
-
       def parse_args(argv) do
         switches =
           for {opt_name, opt_config} <- @global_options do
@@ -101,7 +93,7 @@ defmodule Artificery.Entry do
             end
         end
 
-        halt(0)
+        Console.halt(0)
       end
 
       defp parse_args([], cmd, flags) do
@@ -327,7 +319,7 @@ defmodule Artificery.Entry do
           end
         end
 
-        halt(1)
+        Console.halt(1)
       end
 
       defp print_help([command_name | argv]) do
@@ -422,7 +414,7 @@ defmodule Artificery.Entry do
           end
         end
 
-        halt(1)
+        Console.halt(1)
       end
 
       defp extract_command_path(_commands, [], acc), do: Enum.reverse(acc)
