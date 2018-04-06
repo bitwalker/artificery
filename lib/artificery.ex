@@ -237,14 +237,14 @@ defmodule Artificery do
 
       defoption :verbose, :boolean, hidden: true
   """
-  defmacro defoption(name, type, help) when is_atom(name) and is_atom(type) and is_binary(help) do
-    quote location: :keep do
-      defoption(unquote(name), unquote(type), unquote(help), [])
-    end
-  end
   defmacro defoption(name, type, flags) when is_atom(name) and is_atom(type) and is_list(flags) do
     quote location: :keep do
       defoption(unquote(name), unquote(type), nil, unquote(flags))
+    end
+  end
+  defmacro defoption(name, type, help) when is_atom(name) and is_atom(type) do
+    quote location: :keep do
+      defoption(unquote(name), unquote(type), unquote(help), [])
     end
   end
 
@@ -255,8 +255,7 @@ defmodule Artificery do
 
       defoption :verbose, :boolean, "Turns on verbose output", hidden: true
   """
-  defmacro defoption(name, type, help, flags) when
-    is_atom(name) and is_atom(type) and (is_nil(help) or is_binary(help)) and is_list(flags) do
+  defmacro defoption(name, type, help, flags) when is_atom(name) and is_atom(type) and is_list(flags) do
     quote location: :keep do
       options = Module.get_attribute(__MODULE__, :options)
 
@@ -379,18 +378,17 @@ defmodule Artificery do
 
   See `defoption` for usage examples.
   """
-  defmacro option(name, type, help) when is_atom(name) and is_atom(type) and is_binary(help) do
-    quote location: :keep do
-      option(unquote(name), unquote(type), unquote(help), [])
-    end
-  end
   defmacro option(name, type, flags) when is_atom(name) and is_atom(type) and is_list(flags) do
     quote location: :keep do
       option(unquote(name), unquote(type), nil, unquote(flags))
     end
   end
-  defmacro option(name, type, help, flags) when
-    is_atom(name) and is_atom(type) and (is_nil(help) or is_binary(help)) and is_list(flags) do
+  defmacro option(name, type, help) when is_atom(name) and is_atom(type) do
+    quote location: :keep do
+      option(unquote(name), unquote(type), unquote(help), [])
+    end
+  end
+  defmacro option(name, type, help, flags) when is_atom(name) and is_atom(type) and is_list(flags) do
     quote location: :keep do
       commands = Module.get_attribute(__MODULE__, :commands)
       current_command = var!(current_command, unquote(__MODULE__))
