@@ -65,11 +65,7 @@ defmodule Artificery.Option do
       f when is_function(f, 1) ->
         :ok
       a when is_atom(a) ->
-        if function_exported?(caller, a, 1) do
-          :ok
-        else
-          raise "Invalid transform: #{caller}.#{a}/1 is either undefined or not exported!"
-        end
+        :ok
       {m, f, a} when is_atom(m) and is_atom(f) and is_list(a) ->
         arity = length(a) + 1
         if function_exported?(m, f, arity) do
