@@ -150,7 +150,7 @@ defmodule Artificery.Entry do
           # but should instead be considered a positional argument
           nil when has_arguments ->
             # Pop the first argument off
-            [{arg_name, arg} | arguments] = arguments
+            [arg | arguments] = arguments
 
             # Rename this to prevent confusion
             arg_val = command_name
@@ -161,7 +161,7 @@ defmodule Artificery.Entry do
             # Should we accumulate?
             accumulate? = arg.flags[:accumulate] || false
             new_arg_val =
-              case Map.get(flags, arg_name) do
+              case Map.get(flags, arg.name) do
                 nil when accumulate? ->
                   # Wrap in list
                   [new_arg_val]
@@ -176,7 +176,7 @@ defmodule Artificery.Entry do
               end
 
             # Update flags
-            new_flags = Map.put(flags, arg_name, new_arg_val)
+            new_flags = Map.put(flags, arg.name, new_arg_val)
             # Recur by removing an argument from the stack and updating the flags
             parse_args(argv, %{context_cmd | arguments: arguments}, new_flags)
 
