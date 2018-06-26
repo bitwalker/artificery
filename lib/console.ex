@@ -16,13 +16,15 @@ defmodule Artificery.Console do
   @spec halt(non_neg_integer) :: no_return
   def halt(code)
 
-  if Mix.env == :test do
-    # During tests we don't want to kill the node process,
-    # exit the test process instead
-    def halt(0), do: :ok
-    def halt(code) when code >= 0, do: exit({:halt, code})
-  else
-    def halt(code) when code >= 0, do: System.halt(code)
+  def halt(0), do: :ok
+  def halt(code) when code > 0 do
+    if Application.get_env(:artificery, :no_halt, false) do
+      # During tests we don't want to kill the node process,
+      # exit the test process instead
+      exit({:halt, code})
+    else
+      System.halt(code)
+    end
   end
 
   @doc """
