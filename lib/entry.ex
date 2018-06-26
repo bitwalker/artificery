@@ -59,7 +59,15 @@ defmodule Artificery.Entry do
 
         parser_opts = [strict: switches, aliases: aliases]
 
-        {global_flags, argv, _invalid} = OptionParser.parse_head(argv, parser_opts)
+        {global_flags, argv, nonglobal_flags} = OptionParser.parse_head(argv, parser_opts)
+
+        argv =
+          case nonglobal_flags do
+            [] ->
+              argv
+            [{flag, _}] ->
+              [flag | argv]
+          end
 
         global_flags_base =
           @global_options
@@ -81,6 +89,9 @@ defmodule Artificery.Entry do
 
           ["help" | rest] ->
             print_help(rest)
+
+          ["--" <> flag | _] ->
+            Console.error("Unknown global option '--#{flag}'. Try 'help' for usage information")
 
           [command_name | _] ->
             command_name = String.to_atom(command_name)
@@ -116,6 +127,7 @@ defmodule Artificery.Entry do
           case context_cmd do
             nil ->
               []
+
             %{arguments: arguments} ->
               arguments
           end
