@@ -42,6 +42,8 @@ defmodule Artificery.Entry do
         Console.init()
 
         parse_args(argv)
+
+        Console.halt(0)
       end
 
       def parse_args(argv) do
@@ -103,8 +105,6 @@ defmodule Artificery.Entry do
               Console.error("Unknown command '#{command_name}'. Try 'help' for usage information")
             end
         end
-
-        Console.halt(0)
       end
 
       defp parse_args([], cmd, flags) do
