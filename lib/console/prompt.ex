@@ -13,7 +13,7 @@ defmodule Artificery.Console.Prompt do
 
   @spec yes?(String.t) :: boolean
   def yes?(question) when is_binary(question) do
-    prompt = Color.style("? ", [:green]) <> question <> " (y/N) "
+    prompt = Color.style("? ", [:green]) <> question <> " (Y/n) "
     reply = IO.gets(prompt)
     is_binary(reply) and String.trim(reply) in ["", "y", "Y", "yes", "Yes", "YES"]
   end
