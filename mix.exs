@@ -13,7 +13,8 @@ defmodule Artificery.MixProject do
       elixirc_paths: elixirc_paths(Mix.env),
       preferred_cli_env: [
         docs: :docs,
-        "hex.publish": :docs
+        "hex.publish": :docs,
+        "eqc.install": :test
       ]
     ]
   end
@@ -24,7 +25,8 @@ defmodule Artificery.MixProject do
 
   defp deps do
     [
-      {:ex_doc, ">= 0.0.0", only: [:docs], runtime: false}
+      {:ex_doc, ">= 0.0.0", only: [:docs], runtime: false},
+      {:eqc_ex, "~> 1.4", only: [:test], runtime: false}
     ]
   end
 
