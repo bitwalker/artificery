@@ -71,7 +71,6 @@ defmodule Artificery.Command do
   end
 
   @doc false
-  @impl Access
   def get(%__MODULE__{} = c, key, default \\ nil) do
     case Map.get(c, key) do
       nil ->
