@@ -31,6 +31,8 @@ defmodule Artificery do
   @doc false
   defmacro __using__(opts) when is_list(opts) do
     quote location: :keep do
+      require unquote(__MODULE__).Entry
+
       @behaviour unquote(__MODULE__)
       @before_compile unquote(__MODULE__).Entry
 
