@@ -255,6 +255,9 @@ defmodule Artificery.Entry do
           # Extra arguments, so just dispatch with remaining argv
           new_argv == argv ->
             dispatch(cmd, new_argv, new_flags)
+          # If given extra flag, dispatch immediately.
+          match?(["--extra" | _], new_argv) ->
+            dispatch(cmd, Enum.drop(new_argv, 1), new_flags)
           # Arguments changed during option parsing, so go back to parse_args
           :else ->
             parse_args(new_argv, cmd, new_flags)
