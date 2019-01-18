@@ -213,7 +213,10 @@ defmodule Artificery.Entry do
 
         parser_opts = [strict: switches, aliases: aliases]
 
+        # Split on -- so we can properly handle passing raw arguments to commands
+        {argv, extra_argv} = Enum.split_while(argv, fn "--" -> false; _ -> true end)
         {new_flags, new_argv, _invalid} = OptionParser.parse_head(argv, parser_opts)
+        new_argv = new_argv ++ extra_argv
 
         has_arguments? = length(cmd.arguments) > 0
 
@@ -249,6 +252,9 @@ defmodule Artificery.Entry do
           # No arguments, so dispatch
           length(new_argv) == 0 ->
             dispatch(cmd, [], new_flags)
+          # The remaining arguments should be given to the command
+          match?(["--" | _], new_argv) ->
+            dispatch(cmd, tl(new_argv), new_flags)
           # Has arguments that need processing
           new_argv == argv and has_arguments? ->
             parse_args(new_argv, cmd, new_flags)
