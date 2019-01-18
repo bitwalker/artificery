@@ -88,38 +88,49 @@ defmodule Artificery.Console do
   Prints a debug message, only visible when verbose mode is on
   """
   @spec debug(String.t()) :: :ok
-  def debug(msg), do: log(:standard_error, :debug, colorize("==> #{msg}", [:cyan]))
+  @spec debug(:standard_error | :stdio, String.t()) :: :ok
+  def debug(device \\ :stdio, msg),
+    do: log(device, :debug, colorize("==> #{msg}", [:cyan]))
 
   @doc """
   Prints an info message
   """
   @spec info(String.t()) :: :ok
-  def info(msg), do: log(:stdio, :info, msg)
+  @spec info(:standard_error | :stdio, String.t()) :: :ok
+  def info(device \\ :stdio, msg), 
+    do: log(device, :info, msg)
 
   @doc """
   Prints a notice
   """
   @spec notice(String.t()) :: :ok
-  def notice(msg), do: log(:stdio, :info, colorize(msg, [:bright, :blue]))
+  @spec notice(:standard_error | :stdio, String.t()) :: :ok
+  def notice(device \\ :stdio, msg), 
+    do: log(device, :info, colorize(msg, [:bright, :blue]))
 
   @doc """
   Prints a success message
   """
   @spec success(String.t()) :: :ok
-  def success(msg), do: log(:stdio, :warn, colorize(msg, [:bright, :green]))
+  @spec success(:standard_error | :stdio, String.t()) :: :ok
+  def success(device \\ :stdio, msg), 
+    do: log(device, :warn, colorize(msg, [:bright, :green]))
 
   @doc """
   Prints a warning message
   """
   @spec warn(String.t()) :: :ok
-  def warn(msg), do: log(:standard_error, :warn, colorize(msg, [:yellow]))
+  @spec warn(:standard_error | :stdio, String.t()) :: :ok
+  def warn(device \\ :stdio, msg), 
+    do: log(device, :warn, colorize(msg, [:yellow]))
 
   @doc """
   Prints an error message, and then halts the process
   """
   @spec error(String.t()) :: no_return
-  def error(msg) do
-    log(:standard_error, :error, colorize(bangify(msg), [:red]))
+  @spec error(:standard_error | :stdio, String.t()) :: no_return
+  def error(device \\ :stdio, msg) do
+    log(device, :error, colorize(bangify(msg), [:red]))
     halt(1)
   end
 
