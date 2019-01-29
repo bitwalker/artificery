@@ -146,7 +146,8 @@ defmodule Artificery.Console.Spinner do
     data
   end
   defp clear(%{output: output} = data) do
-    IO.write [Artificery.Console.cursor_up(lines(output)), @erase_down]
+    Artificery.Console.cursor_up(lines(output))
+    IO.write @erase_down
     data
   end
 
