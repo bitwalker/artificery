@@ -112,15 +112,13 @@ defmodule Artificery.Entry do
       end
 
       defp parse_args([command_name | argv] = oargv, context_cmd, flags) do
-        command_name_atom = String.to_atom(command_name)
-
         commands =
           case context_cmd do
             nil ->
-              @commands
+              for {k, v} <- @commands, do: {Atom.to_string(k), v}, into: %{}
 
             %{subcommands: subcommands} ->
-              subcommands
+              for {k, v} <- subcommands, do: {Atom.to_string(k), v}, into: %{}
           end
 
         arguments =
@@ -135,11 +133,11 @@ defmodule Artificery.Entry do
         has_subcommands = map_size(commands) > 0
         has_arguments = length(arguments) > 0
 
-        case Map.get(commands, command_name_atom) do
+        case Map.get(commands, command_name) do
           nil when is_nil(context_cmd) ->
             Console.error("Unknown command '#{command_name}'. Try 'help' for usage information")
 
-          nil when command_name_atom == :help ->
+          nil when command_name == "help" ->
             print_help(argv)
 
           # This means the current argument is not a subcommand name
