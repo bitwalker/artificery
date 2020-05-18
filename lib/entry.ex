@@ -10,11 +10,14 @@ defmodule Artificery.Entry do
     escript? =
       :init.get_plain_arguments()
       |> Enum.map(&List.to_string/1)
-      |> Enum.any?(fn "escript.build" -> true; _ -> false end)
+      |> Enum.any?(fn
+        "escript.build" -> true
+        _ -> false
+      end)
 
     script_name =
       if escript? do
-        Mix.Local.name_for(:escript, Mix.Project.config())
+        Mix.Local.name_for(:escripts, Mix.Project.config())
       else
         "elixir -e \"#{__CALLER__.module}.main\" -- "
       end
@@ -67,6 +70,7 @@ defmodule Artificery.Entry do
           case nonglobal_flags do
             [] ->
               argv
+
             [{flag, _}] ->
               [flag | argv]
           end
@@ -81,7 +85,7 @@ defmodule Artificery.Entry do
           global_flags_base
           |> Keyword.merge(global_flags)
           |> Enum.map(fn {name, val} -> {name, apply_transform(@global_options[name], val)} end)
-          |> Map.new
+          |> Map.new()
 
         Console.configure(verbosity: Map.get(global_flags, :verbose, :normal))
 
@@ -142,7 +146,9 @@ defmodule Artificery.Entry do
 
           # This means the current argument is not a subcommand name
           nil when not has_arguments and has_subcommands ->
-            Console.error("Unknown subcommand '#{command_name}'. Try 'help' for usage information")
+            Console.error(
+              "Unknown subcommand '#{command_name}'. Try 'help' for usage information"
+            )
 
           # This means the current argument is not a subcommand name,
           # but should instead be considered a positional argument
@@ -158,6 +164,7 @@ defmodule Artificery.Entry do
 
             # Should we accumulate?
             accumulate? = arg.flags[:accumulate] || false
+
             new_arg_val =
               case Map.get(flags, arg.name) do
                 nil when accumulate? ->
@@ -199,9 +206,9 @@ defmodule Artificery.Entry do
 
         aliases =
           for {opt_name, opt_config} <- command_opts,
-            a = Map.get(opt_config, :alias),
-            is_atom(a) and not is_nil(a) do
-              {a, opt_name}
+              a = Map.get(opt_config, :alias),
+              is_atom(a) and not is_nil(a) do
+            {a, opt_name}
           end
 
         required =
@@ -212,7 +219,12 @@ defmodule Artificery.Entry do
         parser_opts = [strict: switches, aliases: aliases]
 
         # Split on -- so we can properly handle passing raw arguments to commands
-        {argv, extra_argv} = Enum.split_while(argv, fn "--" -> false; _ -> true end)
+        {argv, extra_argv} =
+          Enum.split_while(argv, fn
+            "--" -> false
+            _ -> true
+          end)
+
         {new_flags, new_argv, _invalid} = OptionParser.parse_head(argv, parser_opts)
         new_argv = new_argv ++ extra_argv
 
@@ -220,7 +232,8 @@ defmodule Artificery.Entry do
 
         # Enforce required options
         for required_flag <- required do
-          if is_nil(Keyword.get(new_flags, required_flag)) and is_nil(Map.get(flags, required_flag)) do
+          if is_nil(Keyword.get(new_flags, required_flag)) and
+               is_nil(Map.get(flags, required_flag)) do
             formatted_flag = format_flag(required_flag)
 
             Console.error(
@@ -234,14 +247,14 @@ defmodule Artificery.Entry do
           command_opts
           |> Enum.map(fn {name, opt} -> {name, opt.flags[:default]} end)
           |> Enum.filter(fn {_, default} -> not is_nil(default) end)
-          |> Map.new
+          |> Map.new()
           |> Map.merge(flags)
 
         # Run transforms on newly parsed flags
         new_flags =
           new_flags
           |> Enum.map(fn {name, val} -> {name, apply_transform(command_opts[name], val)} end)
-          |> Map.new
+          |> Map.new()
 
         # Merge over the top of the base flags (i.e. those already set)
         new_flags = Map.merge(base_new_flags, new_flags)
@@ -250,15 +263,19 @@ defmodule Artificery.Entry do
           # No arguments, so dispatch
           length(new_argv) == 0 ->
             dispatch(cmd, [], new_flags)
+
           # The remaining arguments should be given to the command
           match?(["--" | _], new_argv) ->
             dispatch(cmd, tl(new_argv), new_flags)
+
           # Has arguments that need processing
           new_argv == argv and has_arguments? ->
             parse_args(new_argv, cmd, new_flags)
+
           # Extra arguments, so just dispatch with remaining argv
           new_argv == argv ->
             dispatch(cmd, new_argv, new_flags)
+
           # Arguments changed during option parsing, so go back to parse_args
           :else ->
             parse_args(new_argv, cmd, new_flags)
@@ -270,9 +287,15 @@ defmodule Artificery.Entry do
           case __MODULE__.pre_dispatch(command, argv, flags) do
             {:ok, new_flags} ->
               new_flags
+
             other ->
-              Console.error "Expected {:ok, options} returned from #{__MODULE__}.pre_dispatch/3, got: #{inspect other}"
+              Console.error(
+                "Expected {:ok, options} returned from #{__MODULE__}.pre_dispatch/3, got: #{
+                  inspect(other)
+                }"
+              )
           end
+
         if function_exported?(__MODULE__, callback, 2) do
           apply(__MODULE__, callback, [argv, new_flags])
         else
@@ -285,8 +308,9 @@ defmodule Artificery.Entry do
       defp script_name() do
         candidate =
           :init.get_plain_arguments()
-          |> List.first
-          |> List.to_string
+          |> List.first()
+          |> List.to_string()
+
         if File.exists?(candidate) do
           Path.basename(candidate)
         else
@@ -302,9 +326,11 @@ defmodule Artificery.Entry do
         IO.write("#{script_name()} - A release utility tool\n\n")
 
         IO.write([
-          "USAGE", ?\n,
+          "USAGE",
+          ?\n,
           "  $ #{unquote(script_name)} [global_options] <command> [options..] [args..]",
-          ?\n, ?\n
+          ?\n,
+          ?\n
         ])
 
         IO.write("GLOBAL OPTIONS\n\n")
@@ -340,6 +366,7 @@ defmodule Artificery.Entry do
 
       defp print_help([command_name | argv]) do
         commands = @commands
+
         command_path =
           case extract_command_path(commands, [command_name | argv], []) do
             [] ->
@@ -367,6 +394,7 @@ defmodule Artificery.Entry do
         has_opts? = map_size(cmd.options) > 0
         has_args? = length(cmd.arguments) > 0
         has_help? = not is_nil(help_text) and byte_size(help_text) > 0
+
         has_subcommands? =
           cmd.subcommands
           |> Enum.reject(fn {_name, %{hidden: hidden}} -> hidden end)
@@ -376,10 +404,19 @@ defmodule Artificery.Entry do
         if has_help? do
           IO.write([help_text, ?\n, ?\n])
         end
+
         if has_args? do
-          IO.write(["USAGE", ?\n, "  $ #{unquote(script_name)} #{full_command_name} [options..] [args..]\n\n"])
+          IO.write([
+            "USAGE",
+            ?\n,
+            "  $ #{unquote(script_name)} #{full_command_name} [options..] [args..]\n\n"
+          ])
         else
-          IO.write(["USAGE", ?\n, "  $ #{unquote(script_name)} #{full_command_name} [options..]\n\n"])
+          IO.write([
+            "USAGE",
+            ?\n,
+            "  $ #{unquote(script_name)} #{full_command_name} [options..]\n\n"
+          ])
         end
 
         # Print subcommands
@@ -400,7 +437,8 @@ defmodule Artificery.Entry do
               IO.write([first, ?\n])
             end
           end
-          IO.write "\n"
+
+          IO.write("\n")
         end
 
         # Print options
@@ -414,6 +452,7 @@ defmodule Artificery.Entry do
             IO.write([flag, String.duplicate(" ", max(flag_width - byte_size(flag) + 2, 2))])
             print_help_lines(help, flag_width + 2)
           end
+
           if has_args?, do: IO.write("\n")
         end
 
@@ -451,6 +490,7 @@ defmodule Artificery.Entry do
       defp print_help_lines("", _leading_width) do
         IO.write("\n")
       end
+
       defp print_help_lines(content, leading_width) do
         [first | rest] = String.split(content, "\n", trim: true)
         IO.write([first, ?\n])
@@ -472,30 +512,40 @@ defmodule Artificery.Entry do
           opt_alias = opt.flags[:alias]
           default = opt.flags[:default]
           help = opt.help
+
           help =
             cond do
               is_nil(default) ->
                 help
+
               byte_size(help) > 0 and type == :string ->
                 help <> " (default: \"#{default}\")"
+
               byte_size(help) > 0 ->
                 help <> " (default: #{default})"
+
               type == :string ->
                 "(default: \"#{default}\")"
+
               :else ->
                 "(default: #{default})"
             end
+
           flag =
             cond do
               type == :boolean and not is_nil(opt_alias) ->
                 "  #{format_alias(opt_alias)}, #{format_flag(name)}"
+
               type == :boolean ->
                 "  #{format_flag(name)}"
+
               not is_nil(opt_alias) ->
                 "  #{format_alias(opt_alias)}, #{format_flag(name)}=#{opt.type}"
+
               :else ->
                 "  #{format_flag(name)}=#{opt.type}"
             end
+
           {flag, help || ""}
         end
       end
@@ -503,6 +553,7 @@ defmodule Artificery.Entry do
       defp format_flag(name) when is_atom(name) do
         format_flag(Atom.to_string(name))
       end
+
       defp format_flag(name) when is_binary(name) do
         "--#{String.replace(name, "_", "-")}"
       end
@@ -511,9 +562,11 @@ defmodule Artificery.Entry do
       defp format_alias(opt_alias) when is_atom(opt_alias) do
         format_alias(Atom.to_string(opt_alias))
       end
+
       defp format_alias(<<letter::utf8>>) when letter in @valid_aliases do
         <<?-, letter::utf8>>
       end
+
       defp format_alias(opt_alias) when is_binary(opt_alias) do
         raise "Invalid alias `#{opt_alias}`, must be one character in the range a-zA-Z"
       end
@@ -525,6 +578,7 @@ defmodule Artificery.Entry do
       end
 
       defp column_widths([]), do: {0, 0}
+
       defp column_widths(items) do
         cols =
           items
@@ -536,7 +590,7 @@ defmodule Artificery.Entry do
         acc = :erlang.make_tuple(length(cols), 0)
 
         cols
-        |> Enum.with_index
+        |> Enum.with_index()
         |> Enum.reduce(acc, fn {rows, i}, acc ->
           :erlang.setelement(i + 1, acc, Enum.max(rows))
         end)
@@ -558,14 +612,18 @@ defmodule Artificery.Entry do
         case transform do
           nil ->
             value
+
           f when is_function(f, 1) ->
             f.(value)
+
           a when is_atom(a) ->
             apply(__MODULE__, a, [value])
+
           {m, f, a} when is_atom(m) and is_atom(f) and is_list(a) ->
             apply(m, f, [value | a])
         end
       end
+
       defp apply_transform(%Artificery.Option{}, value), do: value
     end
   end
