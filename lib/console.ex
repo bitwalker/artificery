@@ -13,7 +13,7 @@ defmodule Artificery.Console do
   @doc """
   Terminates the process with the given status code
   """
-  @spec halt(non_neg_integer) :: no_return
+  @spec halt(non_neg_integer) :: :ok | no_return
   def halt(code)
 
   def halt(0), do: :ok
