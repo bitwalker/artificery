@@ -175,10 +175,10 @@ defmodule Artificery.Console do
           send parent, {self(), {:ok, res}}
         rescue
           err ->
-            send parent, {self(), {:exception, {err, System.stacktrace}}}
+            send parent, {self(), {:exception, {err, __STACKTRACE__}}}
         catch
           type, err ->
-            send parent, {self(), {:error, {type, err, System.stacktrace}}}
+            send parent, {self(), {:error, {type, err, __STACKTRACE__}}}
         end
       end)
       loop.(loop, pid)
