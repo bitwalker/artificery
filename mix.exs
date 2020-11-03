@@ -5,7 +5,7 @@ defmodule Artificery.MixProject do
     [
       app: :artificery,
       version: "0.4.3",
-      elixir: "~> 1.6",
+      elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: description(),
