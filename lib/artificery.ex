@@ -70,13 +70,14 @@ defmodule Artificery do
 
 
   @doc """
-  Defines a new command with the given name and either help text or flags
+  Defines a new command with the given name and either help text or flags.
 
-  ## Example
+  ## Examples
 
       command :info, "Displays info about stuff"
 
       command :info, hidden: true
+
   """
   defmacro command(name, help) when is_atom(name) and is_binary(help) do
     quote location: :keep do
@@ -91,9 +92,9 @@ defmodule Artificery do
 
   @doc """
   Defines a new command with the given name, flags or help text, and definition,
-  or flags, help text, and no definition
+  or flags, help text, and no definition.
 
-  ## Example
+  ## Examples
 
       command :info, "Displays info about stuff" do
         ...
@@ -106,6 +107,7 @@ defmodule Artificery do
       command :info, [hidden: true], "Displays info about stuff" do
         ...
       end
+
   """
   defmacro command(name, help, do: block) when is_atom(name) and is_binary(help) do
     quote location: :keep do
@@ -124,13 +126,14 @@ defmodule Artificery do
   end
 
   @doc """
-  Defines a new command with the given name, flags, help text, and definition
+  Defines a new command with the given name, flags, help text, and definition.
 
-  ## Example
+  ## Examples
 
       command :admin, hidden: true, "Does admin stuff" do
         ...
       end
+
   """
   defmacro command(name, flags, help, do: block)
            when is_atom(name) and is_list(flags) and (is_nil(help) or is_binary(help)) do
@@ -226,18 +229,21 @@ defmodule Artificery do
   end
 
   @doc """
-  Defines an option which can be imported into one or more commands. This is an abstract
-  option definition, i.e. it doesn't define an option in any scope, it defines options for reuse.
+  Defines an option which can be imported into one or more commands.
 
-  This macro takes the option name, type, and either help text or options
+  This is an abstract option definition, i.e. it doesn't define an option in
+  any scope, it defines options for reuse.
 
-  Valid types are the same as those defined in `OptionParser`
+  This macro takes the option name, type, and either help text or options.
 
-  ## Example
+  Valid types are the same as those defined in `OptionParser`.
+
+  ## Examples
 
       defoption :verbose, :boolean, "Turns on verbose output"
 
       defoption :verbose, :boolean, hidden: true
+
   """
   defmacro defoption(name, type, flags) when is_atom(name) and is_atom(type) and is_list(flags) do
     quote location: :keep do
@@ -251,11 +257,12 @@ defmodule Artificery do
   end
 
   @doc """
-  Like `defoption/3`, but takes the option name, type, help, and flags
+  Like `defoption/3`, but takes the option name, type, help, and flags.
 
-  ## Example
+  ## Examples
 
       defoption :verbose, :boolean, "Turns on verbose output", hidden: true
+
   """
   defmacro defoption(name, type, help, flags) when is_atom(name) and is_atom(type) and is_list(flags) do
     quote location: :keep do
@@ -280,11 +287,14 @@ defmodule Artificery do
   @doc """
   Imports an option defined via `defoption` into the current scope.
 
-  You may optionally override flags for a given option by passing a keyword list as a second argument.
-  You are not allowed to override the type of the option, but you may override the help text, by passing
-  `help: "..."` as an override. If you need to override the type, it is better if you use `option/3` or `option/4`
+  You may optionally override flags for a given option by passing a keyword
+  list as a second argument.
 
-  ## Example
+  You are not allowed to override the type of the option, but you may override
+  the help text, by passing `help: "..."` as an override. If you need to
+  override the type, it is better if you use `option/3` or `option/4`
+
+  ## Examples
 
       defoption :name, :string, "Name of person"
 
@@ -298,6 +308,7 @@ defmodule Artificery do
         # Import and customize help text
         option :name, help: "Name of the person to greet"
       end
+
   """
   defmacro option(name) when is_atom(name) do
     quote location: :keep do
@@ -310,7 +321,7 @@ defmodule Artificery do
 
       option :foo, :string
 
-  This defines a new option, foo, of type string, with no help or flags defined
+  This defines a new option, foo, of type string, with no help or flags defined.
 
   When used like this:
 
@@ -375,8 +386,11 @@ defmodule Artificery do
   end
 
   @doc """
-  Similar to `defoption`, but defines an option inline. Options defined this way apply either to the global
-  scope, if they aren't nested within a `command` macro, or to the scope of the command they are defined in.
+  Similar to `defoption`, but defines an option inline.
+
+  Options defined this way apply either to the global scope, if they aren't
+  nested within a `command` macro, or to the scope of the command they are
+  defined in.
 
   See `defoption` for usage examples.
   """
@@ -428,11 +442,13 @@ defmodule Artificery do
   end
 
   @doc """
-  Like `option`, but rather than a command switch, it defines a positional argument.
+  Like `option`, but rather than a command switch, it defines a positional
+  argument.
 
-  Beyond the semantics of switches vs positional args, this takes the same configuration as `option` or `defoption`
+  Beyond the semantics of switches vs positional args, this takes the same
+  configuration as `option` or `defoption`.
 
-  ## Example
+  ## Examples
 
       argument :name, :string
   """
@@ -443,13 +459,14 @@ defmodule Artificery do
   end
 
   @doc """
-  Like `argument/2`, but takes either help text or a keyword list of flags
+  Like `argument/2`, but takes either help text or a keyword list of flags.
 
-  ## Example
+  ## Examples
 
       argument :name, :string, "The name to use"
 
       argument :name, :string, required: true
+
   """
   defmacro argument(name, type, help) when is_atom(name) and is_atom(type) and is_binary(help) do
     quote location: :keep do
@@ -463,11 +480,13 @@ defmodule Artificery do
   end
 
   @doc """
-  Like `argument/3`, but takes a name, type, help text and keyword list of flags
+  Like `argument/3`, but takes a name, type, help text and keyword list of
+  flags.
 
-  ## Example
+  ## Examples
 
       argument :name, :string, "The name to use", required: true
+
   """
   defmacro argument(name, type, help, flags) when
     is_atom(name) and is_atom(type) and (is_nil(help) or is_binary(help)) and is_list(flags) do

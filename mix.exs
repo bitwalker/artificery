@@ -1,6 +1,8 @@
 defmodule Artificery.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/bitwalker/artificery"
+
   def project do
     [
       app: :artificery,
@@ -8,6 +10,7 @@ defmodule Artificery.MixProject do
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      docs: docs(),
       description: description(),
       package: package(),
       elixirc_paths: elixirc_paths(Mix.env),
@@ -30,16 +33,23 @@ defmodule Artificery.MixProject do
     ]
   end
 
+  defp docs do
+    [
+      extras: ["README.md"],
+      main: "readme"
+    ]
+  end
+
   defp description, do: "A toolkit for terminal user interfaces in Elixir"
 
   defp package do
     [
       files: ["lib", "mix.exs", "README.md", "LICENSE.md"],
       maintainers: ["Paul Schoenfelder"],
-      licenses: ["Apache 2.0"],
+      licenses: ["Apache-2.0"],
       links: %{
-        GitHub: "https://github.com/bitwalker/artificery",
-        Issues: "https://github.com/bitwalker/artificery/issues"
+        GitHub: @source_url,
+        Issues: @source_url <> "/issues"
       }
     ]
   end

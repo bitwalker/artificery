@@ -31,7 +31,7 @@ defmodule Artificery.Option do
   ]
 
   @doc """
-  Creates a new Option struct
+  Creates a new Option struct.
   """
   @spec new(atom, map) :: t
   def new(name, flags) when is_atom(name) and is_map(flags) do
@@ -47,7 +47,7 @@ defmodule Artificery.Option do
   end
 
   @doc """
-  Validates the Option struct, raising an error if invalid
+  Validates the Option struct, raising an error if invalid.
   """
   @spec validate!(t, [caller: module]) :: :ok | no_return
   def validate!(%__MODULE__{flags: flags}, caller: caller) do

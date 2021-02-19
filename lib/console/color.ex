@@ -24,7 +24,7 @@ defmodule Artificery.Console.Color do
   any of those found in `IO.ANSI`, such as `:faint` or `:cyan`, and also
   supports `:dim` as an alias for `:faint`, as well as `:grey` or `:gray`.
 
-  Returns a formatted binary
+  Returns a formatted binary.
   """
   @spec style(binary, [atom]) :: binary
   def style(msg, styles) when is_list(styles) do
@@ -51,7 +51,7 @@ defmodule Artificery.Console.Color do
   end
 
   @doc """
-  Returns true if the current terminal supports color output, false if not
+  Returns true if the current terminal supports color output, false if not.
   """
   @spec supports_color?() :: boolean
   def supports_color? do
@@ -59,7 +59,8 @@ defmodule Artificery.Console.Color do
   end
 
   @doc """
-  Returns true if the current terminal supports 256bit color output, false if not
+  Returns true if the current terminal supports 256bit color output, false if
+  not.
   """
   @spec supports_256color?() :: boolean
   def supports_256color? do
@@ -67,7 +68,8 @@ defmodule Artificery.Console.Color do
   end
 
   @doc """
-  Returns true if the current terminal supports 16M bit color output, false if not
+  Returns true if the current terminal supports 16M bit color output, false if
+  not.
   """
   @spec supports_truecolor?() :: boolean
   def supports_truecolor? do

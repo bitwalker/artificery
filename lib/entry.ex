@@ -28,7 +28,8 @@ defmodule Artificery.Entry do
       @doc """
       Main entry point for this script.
 
-      Handles parsing and validating arguments, then dispatching the selected command
+      Handles parsing and validating arguments, then dispatching the selected
+      command.
       """
       def main() do
         argv =
@@ -151,7 +152,7 @@ defmodule Artificery.Entry do
             )
 
           # This means the current argument is not a subcommand name,
-          # but should instead be considered a positional argument
+          # but should instead be considered a positional argument.
           nil when has_arguments ->
             # Pop the first argument off
             [arg | arguments] = arguments
@@ -185,8 +186,8 @@ defmodule Artificery.Entry do
             # Recur by removing an argument from the stack and updating the flags
             parse_args(argv, %{context_cmd | arguments: arguments}, new_flags)
 
-          # No subcommands and no defined positional arguments
-          # Just pass the plain argv to the command in case it wants them
+          # No subcommands and no defined positional arguments.
+          # Just pass the plain argv to the command in case it wants them.
           nil ->
             post_process_command(context_cmd, oargv, flags)
 
@@ -218,7 +219,8 @@ defmodule Artificery.Entry do
 
         parser_opts = [strict: switches, aliases: aliases]
 
-        # Split on -- so we can properly handle passing raw arguments to commands
+        # Split on -- so we can properly handle passing raw arguments to
+        # commands.
         {argv, extra_argv} =
           Enum.split_while(argv, fn
             "--" -> false
@@ -370,7 +372,7 @@ defmodule Artificery.Entry do
         command_path =
           case extract_command_path(commands, [command_name | argv], []) do
             [] ->
-              # Not actually a subcommand path, so print top level help
+              # Not actually a subcommand path, so print top level help.
               print_help([])
 
             path ->
@@ -382,7 +384,7 @@ defmodule Artificery.Entry do
           |> Enum.map(&Atom.to_string/1)
           |> Enum.join(" ")
 
-        # Validate command
+        # Validate command.
         cmd = get_in(commands, Enum.intersperse(command_path, :subcommands))
 
         if is_nil(cmd) do

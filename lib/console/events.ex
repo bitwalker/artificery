@@ -4,28 +4,28 @@ defmodule Artificery.Console.Events do
   @behaviour :gen_event
 
   @doc """
-  Start listening for console events
+  Start listening for console events.
   """
   def start do
     :gen_event.add_handler(:erl_signal_server, __MODULE__, [])
   end
 
   @doc """
-  Stop listening for console events
+  Stop listening for console events.
   """
   def stop do
     :gen_event.delete_handler(:erl_signal_server, __MODULE__, :normal)
   end
 
   @doc """
-  Subscribe the current process to event notifications
+  Subscribe the current process to event notifications.
   """
   def subscribe do
     :gen_event.call(:erl_signal_server, __MODULE__, {:subscribe, self()})
   end
 
   @doc """
-  Unsubscribe the current process from event notifications
+  Unsubscribe the current process from event notifications.
   """
   def unsubscribe do
     :gen_event.call(:erl_signal_server, __MODULE__, {:unsubscribe, self()})

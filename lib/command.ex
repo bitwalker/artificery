@@ -24,7 +24,7 @@ defmodule Artificery.Command do
   }
 
   @doc """
-  Creates a new Command struct, with the given flags applied
+  Creates a new Command struct, with the given flags applied.
   """
   @spec new(atom, map) :: t
   def new(name, flags) when is_map(flags) do
@@ -44,7 +44,7 @@ defmodule Artificery.Command do
   end
 
   @doc """
-  Extends the given Command with a new option
+  Extends the given Command with a new option.
   """
   @spec add_option(t, Artificery.Option.t) :: t
   def add_option(%__MODULE__{options: opts} = c, %Artificery.Option{name: name} = opt) do
@@ -52,7 +52,7 @@ defmodule Artificery.Command do
   end
 
   @doc """
-  Extends the given Command with a new positional argument
+  Extends the given Command with a new positional argument.
   """
   @spec add_argument(t, Artificery.Option.t) :: t
   def add_argument(%__MODULE__{arguments: args} = c, %Artificery.Option{} = arg) do
