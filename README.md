@@ -1,7 +1,14 @@
 # Artificery
 
-Artificery is a toolkit for generating command line applications. It handles argument parsing, validation/transformation,
-generating help, and provides an easy way to define commands, their arguments, and options.
+[![Module Version](https://img.shields.io/hexpm/v/artificery.svg)](https://hex.pm/packages/artificery)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/artificery/)
+[![Total Download](https://img.shields.io/hexpm/dt/artificery.svg)](https://hex.pm/packages/artificery)
+[![License](https://img.shields.io/hexpm/l/artificery.svg)](https://github.com/bitwalker/artificery/blob/master/LICENSE)
+[![Last Updated](https://img.shields.io/github/last-commit/bitwalker/artificery.svg)](https://github.com/bitwalker/artificery/commits/master)
+
+Artificery is a toolkit for generating command line applications. It handles
+argument parsing, validation/transformation, generating help, and provides an
+easy way to define commands, their arguments, and options.
 
 ## Installation
 
@@ -20,8 +27,8 @@ Then run `mix deps.get` and you are ready to get started!
 
 ## Defining a CLI
 
-Let's assume you have an application named `:myapp`, let's define a module, `MyCliModule` which
-will be the entry point for the command line interface:
+Let's assume you have an application named `:myapp`, let's define a module,
+`MyCliModule` which will be the entry point for the command line interface:
 
 ```elixir
 defmodule MyCliModule do
@@ -29,8 +36,9 @@ defmodule MyCliModule do
 end
 ```
 
-The above will setup the Artificery internals for your CLI, namely it defines an entry point for the command line,
-argument parsing, and imports the macros for defining commands, options, and arguments.
+The above will setup the Artificery internals for your CLI, namely it defines
+an entry point for the command line, argument parsing, and imports the macros
+for defining commands, options, and arguments.
 
 ### Commands
 
@@ -39,19 +47,22 @@ Let's add a simple "hello" command, which will greet the caller:
 ```elixir
 defmodule MyCliModule do
   use Artificery
-  
+
   command :hello, "Says hello" do
     argument :name, :string, "The name of the person to greet", required: true
   end
 end
 ```
 
-We've introduced two of the macros Aritificery imports: `command`, for defining top-level and nested commands; and
-`argument` for defining positional arguments for the current command. **Note**: `argument` can only be used inside of
-`command`, as it applies to the current command being defined, and has no meaning globally.
+We've introduced two of the macros Aritificery imports: `command`, for defining
+top-level and nested commands; and `argument` for defining positional arguments
+for the current command. **Note**: `argument` can only be used inside of
+`command`, as it applies to the current command being defined, and has no
+meaning globally.
 
-This command could be invoked (via escript) like so: `./myapp hello bitwalker`. Right now this will print an error stating
-that the command is defined, but no matching implementation was exported. We define that like so:
+This command could be invoked (via escript) like so: `./myapp hello bitwalker`.
+Right now this will print an error stating that the command is defined, but no
+matching implementation was exported. We define that like so:
 
 ```elixir
 def hello(_argv, %{name: name}) do
@@ -59,12 +70,15 @@ def hello(_argv, %{name: name}) do
 end
 ```
 
-**Note**: Command handlers are expected to have an arity of 2, where the first argument is a list of unhandled arguments/options passed on
-the command line, and the second is a map containing all of the formally defined arguments/options.
+**Note**: Command handlers are expected to have an arity of 2, where the first
+argument is a list of unhandled arguments/options passed on the command line,
+and the second is a map containing all of the formally defined
+arguments/options.
 
-This goes in the same module as the command definition, but you can use `defdelegate` to put the implementation elsewhere. The thing
-to note is that the function needs to be named the same as the command. You can change this however using an extra parameter to `command`,
-like so:
+This goes in the same module as the command definition, but you can use
+`defdelegate` to put the implementation elsewhere. The thing to note is that
+the function needs to be named the same as the command. You can change this
+however using an extra parameter to `command`, like so:
 
 ```elixir
 command :hello, [callback: :say_hello], "Says hello" do
@@ -72,14 +86,15 @@ command :hello, [callback: :say_hello], "Says hello" do
 end
 ```
 
-The above will invoke `say_hello/2` rather than `hello/2**.
+The above will invoke `say_hello/2` rather than `hello/2`.
 
 ### Command Flags
 
-There are two command flags you can set currently to alter some of Artificery's behaviour: `callback: atom` and
-`hidden: boolean`. The former will change the callback function invoked when dispatching a command, as shown above,
-and the latter, when true, will hide the command from display in the `help` output. You may also apply `:hidden` to
-options (but not arguments).
+There are two command flags you can set currently to alter some of Artificery's
+behaviour: `callback: atom` and `hidden: boolean`. The former will change the
+callback function invoked when dispatching a command, as shown above, and the
+latter, when true, will hide the command from display in the `help` output. You
+may also apply `:hidden` to options (but not arguments).
 
 ### Options
 
@@ -106,37 +121,41 @@ And we're done!
 
 ### Subcommands
 
-When you have more complex command line interfaces, it is common to divide up "topics" or top-level commands into subcommands,
-you see this in things like Heroku's CLI, e.g. `heroku keys:add`. Artificery supports this by allowing you to nest `command` 
-within another `command`. Artificery is smart about how it parses arguments, so you can have options/arguments at the top-level
-as well as in subcommands, e.g. `./myapp info --format=json processes`. The options map received by the `processes` command
-will contain all of the options for commands above it.
+When you have more complex command line interfaces, it is common to divide up
+"topics" or top-level commands into subcommands, you see this in things like
+Heroku's CLI, e.g. `heroku keys:add`. Artificery supports this by allowing you
+to nest `command` within another `command`. Artificery is smart about how it
+parses arguments, so you can have options/arguments at the top-level as well as
+in subcommands, e.g. `./myapp info --format=json processes`. The options map
+received by the `processes` command will contain all of the options for
+commands above it.
 
 ```elixir
 defmodule MyCliModule do
   use Artificery
-  
+
   command :info, "Get info about :myapp" do
     option :format, :string, "Sets the output format"
-    
+
     command :processes, "Prints information about processes running in :myapp"
   end
 ```
 
-**Note**: As you may have noticed above, the `processes` command doesn't have a `do` block, because it
-doesn't define any arguments or options, this form is supported for convenience
-
+**Note**: As you may have noticed above, the `processes` command doesn't have a
+`do` block, because it doesn't define any arguments or options, this form is
+supported for convenience.
 
 ### Global Options
 
-You may define global options which apply to all commands by defining them outside `command`:
+You may define global options which apply to all commands by defining them
+outside `command`:
 
 ```elixir
 defmodule MyCliModule do
   use Artificery
-  
+
   option :debug, :boolean, "When set, produces debugging output"
-  
+
   ...
 end
 ```
@@ -146,9 +165,10 @@ and can act accordingly.
 
 ### Reusing Options
 
-You can define reusable options via `defoption/3` or `defoption/4`. These are effectively the same as
-`option/3` and `option/4`, except they do not define an option in any context, they are defined abstractly
-and intended to be used via `option/1` or `option/2`, as shown below:
+You can define reusable options via `defoption/3` or `defoption/4`. These are
+effectively the same as `option/3` and `option/4`, except they do not define an
+option in any context, they are defined abstractly and intended to be used via
+`option/1` or `option/2`, as shown below:
 
 ```elixir
 defoption :host, :string, "The hostname of the server to connect to",
@@ -157,7 +177,7 @@ defoption :host, :string, "The hostname of the server to connect to",
 command :ping, "Pings the host to verify connectivity" do
   # With no overridden flags
   # option :host
-  
+
   # With overrides
   option :host, help: "The host to ping", default: "localhost"
 end
@@ -171,8 +191,8 @@ end
 
 ### Option/Argument Transforms
 
-You can provide transforms for options or arguments to convert them to the data types your commands desire as part of
-the option definition, like so:
+You can provide transforms for options or arguments to convert them to the data
+types your commands desire as part of the option definition, like so:
 
 ```elixir
 # Options
@@ -185,16 +205,18 @@ option :ip, :string, "The IP address of the host to connect to",
         raise "invalid value for --ip, got: #{raw}, error: #{inspect reason}"
     end
   end
-  
+
 # Arguments
 argument :ip, :string, "The IP address of the host to connect to",
   transform: ...
 ```
 
-Now the command (and any subcommands) where this option is defined will get a parsed IP address, rather than
-a raw string, allowing you to do the conversion in one place, rather than in each command handler.
+Now the command (and any subcommands) where this option is defined will get a
+parsed IP address, rather than a raw string, allowing you to do the conversion
+in one place, rather than in each command handler.
 
-Currently this macro supports functions in anonymous form (like in the example above), or one of the following forms:
+Currently this macro supports functions in anonymous form (like in the example
+above), or one of the following forms:
 
 ```elixir
 # Function capture, must have arity 1
@@ -210,12 +232,14 @@ transform: {String, :to_char_list, []}
 
 ### Pre-Dispatch Handling
 
-For those cases where you need to perform some action before command handlers are invoked,
-perhaps to apply global behaviour to all commands, start applications, or whatever else you may need,
-Artificery provides a hook for that, `pre_dispatch/3`.
+For those cases where you need to perform some action before command handlers
+are invoked, perhaps to apply global behaviour to all commands, start
+applications, or whatever else you may need, Artificery provides a hook for
+that, `pre_dispatch/3`.
 
-This is actually a callback defined as part of the `Artificery` behaviour, but is given a default
-implementation. You can override this implementation though to provide your own pre-dispatch step.
+This is actually a callback defined as part of the `Artificery` behaviour, but
+is given a default implementation. You can override this implementation though
+to provide your own pre-dispatch step.
 
 The default implementation is basically the following:
 
@@ -225,40 +249,45 @@ def pre_dispatch(%Artificery.Command{}, _argv, %{} = options) do
 end
 ```
 
-You can either return `{:ok, options}` or raise an error, there are no other choices permitted. This
-allows you to extend or filter `options`, handle additional arguments in `argv`, or take action based
-on the current command.
+You can either return `{:ok, options}` or raise an error, there are no other
+choices permitted. This allows you to extend or filter `options`, handle
+additional arguments in `argv`, or take action based on the current command.
 
 ## Writing Output / Logging
 
-Artificery provides a `Console` module which contains a number of functions for logging or writing output
-to standard out/standard error. A list of basic functions it provides is below:
+Artificery provides a `Console` module which contains a number of functions for
+logging or writing output to standard out/standard error. A list of basic
+functions it provides is below:
 
 - `configure/1`, takes a list of options which configures the logger, currently the only option is `:verbosity`
 - `debug/1`, writes a debug message to stderr (colored cyan if terminal supports color)
 - `info/1`, writes an info message to stdout (no color)
-- `notice/1`, writes an informatinal notice to stdout (bright blue)
+- `notice/1`, writes an informational notice to stdout (bright blue)
 - `success/1`, writes a success message to stdout (bright green)
 - `warn/1`, writes a warning to stderr (yellow)
 - `error/1`, writes an error to stderr (red), and also halts/terminates the process with a non-zero exit code
 
-In addition to writing messages to the terminal, `Console` also provides a way to provide a spinner/loading animation
-while some long-running work is being performed, also supporting the ability to update the message with progress information.
+In addition to writing messages to the terminal, `Console` also provides a way
+to provide a spinner/loading animation while some long-running work is being
+performed, also supporting the ability to update the message with progress
+information.
 
-The following example shows a trivial example of progress, by simply reading from a file in a loop, updating the status
-of the spinner while it reads. There are obviously cleaner ways of writing this, but hopefully it is clear what the capabilities are.
+The following example shows a trivial example of progress, by simply reading
+from a file in a loop, updating the status of the spinner while it reads. There
+are obviously cleaner ways of writing this, but hopefully it is clear what the
+capabilities are.
 
 ```elixir
 def load_data(_argv, %{path: path}) do
   alias Artificery.Console
-  
+
   unless File.exists?(path) do
     Console.error "No such file: #{path}"
   end
-  
+
   # A state machine defined as a recursive anonymous function
   # Each state updates the spinner status and is reflected in the console
-  loader = fn 
+  loader = fn
     :opening, _size, _bytes_read, _file, loader ->
       Console.update_spinner("opening #{path}")
       %{size: size} = File.stat!(path)
@@ -322,13 +351,18 @@ defp is_valid_name(name) when byte_size(name) > 1, do: :ok
 defp is_valid_name(_), do: {:error, "You must tell me your name or I can't greet you!"}
 ```
 
-The above will accept any name more than one character in length, obviously not super robust, but the general idea is shown here.
-The `ask` function also supports transforming responses, and providing defaults in the case where you want to accept blank answers.
+The above will accept any name more than one character in length, obviously not
+super robust, but the general idea is shown here.
+
+The `ask` function also supports transforming responses, and providing defaults
+in the case where you want to accept blank answers.
+
 Check the docs for more information!
 
 ## Producing An Escript
 
-To use your newly created CLI as an escript, simply add the following to your `mix.exs`:
+To use your newly created CLI as an escript, simply add the following to your
+`mix.exs`:
 
 ```elixir
 defp project do
@@ -345,15 +379,17 @@ defp escript do
 end
 ```
 
-The `main_module` to use is the module in which you added `use Artificery`, i.e. the module in
-which you defined the commands your application exposes.
+The `main_module` to use is the module in which you added `use Artificery`,
+i.e. the module in which you defined the commands your application exposes.
 
-Finally, run `mix escript.build` to generate the escript executable. You can then run `./yourapp help` to test it out.
+Finally, run `mix escript.build` to generate the escript executable. You can
+then run `./yourapp help` to test it out.
 
 ## Using In Releases
 
-If you want to define the CLI as part of a larger application, and consume it via custom commands in Distillery, it is
-very straightforward to do. You'll need to define a custom command and add it to your release configuration:
+If you want to define the CLI as part of a larger application, and consume it
+via custom commands in Distillery, it is very straightforward to do. You'll
+need to define a custom command and add it to your release configuration:
 
 ```elixir
 
@@ -374,20 +410,32 @@ Then in `rel/commands/mycli.sh` add the following:
 elixir -e "MyCliModule.main" -- "$@"
 ```
 
-Since the code for your application will already be on the path in a release, we simply need to invoke the CLI module and pass in arguments.
-We add `--` between the `elixir` arguments and those provided from the command line to ensure that they are not treated like arguments to our
-CLI. Artificery handles this, so you simply need to ensure that you add `--` when invoking via `elixir` like this.
+Since the code for your application will already be on the path in a release,
+we simply need to invoke the CLI module and pass in arguments.  We add `--`
+between the `elixir` arguments and those provided from the command line to
+ensure that they are not treated like arguments to our CLI. Artificery handles
+this, so you simply need to ensure that you add `--` when invoking via `elixir`
+like this.
 
-You can then invoke your CLI via the custom command, for example, `bin/myapp mycli help` to print the help text.
+You can then invoke your CLI via the custom command, for example, `bin/myapp
+mycli help` to print the help text.
 
 ## Roadmap
 
 - [ ] Support validators
 
-I'm open to suggestions, just open an issue titled `RFC: <feature you are requesting>`
+I'm open to suggestions, just open an issue titled `RFC: <feature you are requesting>`.
 
 ## License
 
-This project is licensed under Apache 2.0
+Copyright (c) 2018 Paul Schoenfelder
 
-See the LICENSE file in this repository for details.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

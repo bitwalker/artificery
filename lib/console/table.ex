@@ -1,5 +1,7 @@
 defmodule Artificery.Console.Table do
-  @moduledoc "A printer for tabular data"
+  @moduledoc """
+  A printer for tabular data.
+  """
 
   @doc """
   Given a title, header, and rows, prints the data as a table.
@@ -15,9 +17,9 @@ defmodule Artificery.Console.Table do
 
   Takes an optional keyword list of options:
 
-  - `padding: integer` sets the padding around columns
+    * `:padding` - (integer) sets the padding around columns
 
-  This function formats the data as iodata, it is up to the caller to print it
+  This function formats the data as iodata, it is up to the caller to print it.
   """
   def format(title, header, rows, opts \\ []) do
     padding = Keyword.get(opts, :padding, 1)

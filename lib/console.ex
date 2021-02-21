@@ -1,5 +1,5 @@
 defmodule Artificery.Console do
-  @moduledoc "A minimal logger"
+  @moduledoc "A minimal logger."
 
   alias __MODULE__.Events
 
@@ -11,7 +11,7 @@ defmodule Artificery.Console do
   #@erase_down @esc <> "J"
 
   @doc """
-  Terminates the process with the given status code
+  Terminates the process with the given status code.
   """
   @spec halt(non_neg_integer) :: :ok | no_return
   def halt(code)
@@ -20,7 +20,7 @@ defmodule Artificery.Console do
   def halt(code) when code > 0 do
     if Application.get_env(:artificery, :no_halt, false) do
       # During tests we don't want to kill the node process,
-      # exit the test process instead
+      # exit the test process instead.
       exit({:halt, code})
     else
       System.halt(code)
@@ -38,12 +38,12 @@ defmodule Artificery.Console do
   end
 
   @doc """
-  Ask the user a question which requires a yes/no answer, returns a boolean
+  Ask the user a question which requires a yes/no answer, returns a boolean.
   """
   defdelegate yes?(question), to: __MODULE__.Prompt
 
   @doc """
-  Ask the user to provide data in response to a question
+  Ask the user to provide data in response to a question.
 
   The value returned is dependent on whether a transformation is applied,
   and whether blank answers are accepted. By default, empty strings will
@@ -65,7 +65,7 @@ defmodule Artificery.Console do
   raw input string the user provided _after_ the validator has validated the input,
   if one was supplied, and if the user input was non-nil.
 
-  Supply default values with the `default: term` option
+  Supply default values with the `default: term` option.
   """
   defdelegate ask(question, opts \\ []), to: __MODULE__.Prompt
 
@@ -73,7 +73,7 @@ defmodule Artificery.Console do
   Write text or iodata to standard output.
 
   You may optionally pass a list of styles to apply to the output, as well
-  as the device to write to (:standard_error, or :stdio)
+  as the device to write to (:standard_error, or :stdio).
   """
   @spec write(iodata) :: :ok
   @spec write(iodata, [atom]) :: :ok
@@ -85,7 +85,7 @@ defmodule Artificery.Console do
   end
 
   @doc """
-  Prints a debug message, only visible when verbose mode is on
+  Prints a debug message, only visible when verbose mode is on.
   """
   @spec debug(String.t()) :: :ok
   @spec debug(:standard_error | :stdio, String.t()) :: :ok
@@ -93,11 +93,11 @@ defmodule Artificery.Console do
     do: log(device, :debug, colorize("==> #{msg}", [:cyan]))
 
   @doc """
-  Prints an info message
+  Prints an info message.
   """
   @spec info(String.t()) :: :ok
   @spec info(:standard_error | :stdio, String.t()) :: :ok
-  def info(device \\ :stdio, msg), 
+  def info(device \\ :stdio, msg),
     do: log(device, :info, msg)
 
   @doc """
@@ -105,7 +105,7 @@ defmodule Artificery.Console do
   """
   @spec notice(String.t()) :: :ok
   @spec notice(:standard_error | :stdio, String.t()) :: :ok
-  def notice(device \\ :stdio, msg), 
+  def notice(device \\ :stdio, msg),
     do: log(device, :info, colorize(msg, [:bright, :blue]))
 
   @doc """
@@ -113,7 +113,7 @@ defmodule Artificery.Console do
   """
   @spec success(String.t()) :: :ok
   @spec success(:standard_error | :stdio, String.t()) :: :ok
-  def success(device \\ :stdio, msg), 
+  def success(device \\ :stdio, msg),
     do: log(device, :warn, colorize(msg, [:bright, :green]))
 
   @doc """
@@ -121,11 +121,11 @@ defmodule Artificery.Console do
   """
   @spec warn(String.t()) :: :ok
   @spec warn(:standard_error | :stdio, String.t()) :: :ok
-  def warn(device \\ :stdio, msg), 
+  def warn(device \\ :stdio, msg),
     do: log(device, :warn, colorize(msg, [:yellow]))
 
   @doc """
-  Prints an error message, and then halts the process
+  Prints an error message, and then halts the process.
   """
   @spec error(String.t()) :: no_return
   @spec error(:standard_error | :stdio, String.t()) :: no_return
@@ -139,13 +139,14 @@ defmodule Artificery.Console do
 
   ## Options
 
-  - spinner: one of the spinners defined in Artificery.Console.Spinner
+    * `:spinner` - one of the spinners defined in Artificery.Console.Spinner
 
-  ## Example
+  ## Examples
 
       Console.spinner "Loading...", [spinner: :simple_dots] do
         :timer.sleep(5_000)
       end
+
   """
   defmacro spinner(msg, opts \\ [], do: block) when is_binary(msg) do
     quote location: :keep do
@@ -186,14 +187,14 @@ defmodule Artificery.Console do
   end
 
   @doc """
-  Updates a running spinner with the provided status text
+  Updates a running spinner with the provided status text.
   """
   @spec update_spinner(String.t) :: :ok
   def update_spinner(status) when is_binary(status) do
     Artificery.Console.Spinner.status(status)
   end
 
-  # Used for tests
+  # Used for tests.
   @doc false
   def update_spinner(spinner, status) do
     Artificery.Console.Spinner.status(spinner, status)
@@ -205,35 +206,35 @@ defmodule Artificery.Console do
   @doc false
   def hide_cursor(), do: IO.write([@cursor_hide])
 
-  # Move the cursor up the screen by `n` lines
+  # Move the cursor up the screen by `n` lines.
   @doc false
   def cursor_up(n), do: IO.write([@esc, "#{n}A"])
 
-  # Move the cursor down the screen by `n` lines
+  # Move the cursor down the screen by `n` lines.
   @doc false
   def cursor_down(n), do: IO.write([@esc, "#{n}B"])
 
-  # Move the cursor right on the screen by `n` columns
+  # Move the cursor right on the screen by `n` columns.
   @doc false
   def cursor_forward(n), do: IO.write([@esc, "#{n}C"])
 
-  # Move the cursor left on the screen by `n` columns
+  # Move the cursor left on the screen by `n` columns.
   @doc false
   def cursor_backward(n), do: IO.write([@esc, "#{n}D"])
 
-  # Move the cursor to the next line
+  # Move the cursor to the next line.
   @doc false
   def cursor_next_line, do: IO.write([@esc, "E"])
 
-  # Move the cursor to the previous line
+  # Move the cursor to the previous line.
   @doc false
   def cursor_prev_line, do: IO.write([@esc, "F"])
 
-  # Erases the current line, placing the cursor at the beginning
+  # Erases the current line, placing the cursor at the beginning.
   @doc false
   def erase_line, do: IO.write([@cursor_left, @erase_line])
 
-  # Erases `n` lines starting at the current line and going up the screen
+  # Erases `n` lines starting at the current line and going up the screen.
   @doc false
   def erase_lines(0), do: ""
   def erase_lines(n) when is_integer(n) do
