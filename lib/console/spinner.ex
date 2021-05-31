@@ -124,7 +124,7 @@ defmodule Artificery.Console.Spinner do
   end
   def handle_cast({:stop, status}, data) do
     Artificery.Console.Events.unsubscribe
-    render(set_status(data, status))
+    _ = render(set_status(data, status))
     IO.write @cursor_show
     {:stop, :normal, nil}
   end
@@ -135,7 +135,7 @@ defmodule Artificery.Console.Spinner do
   end
 
   defp render(%{text: text, status: status} = data) do
-    clear(data)
+    data = clear(data)
     {frame_data, data} = frame(data)
     output = "#{frame_data} #{text} #{status}\n"
     IO.write(output)

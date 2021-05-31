@@ -26,7 +26,7 @@ defmodule Artificery.Console.Color do
 
   Returns a formatted binary.
   """
-  @spec style(binary, [atom]) :: binary
+  @spec style(iodata, [atom]) :: binary
   def style(msg, styles) when is_list(styles) do
     do_style(Enum.uniq(styles), [msg], false)
   end

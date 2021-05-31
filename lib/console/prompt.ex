@@ -67,12 +67,14 @@ defmodule Artificery.Console.Prompt do
 
   # TODO: Open EDITOR to a temp file, read in result when closed
   @doc false
-  @spec edit() :: String.t
+  # @spec edit() :: String.t
+  @spec edit() :: no_return()
   def edit(), do: exit(:not_implemented)
 
   # TODO: Choose from a selection of options
   @doc false
-  @spec choose(String.t, [String.t]) :: String.t
+  # @spec choose(String.t, [String.t]) :: String.t
+  @spec choose(String.t, [String.t]) :: no_return()
   def choose(question, choices) when is_binary(question) and is_list(choices) do
     exit(:not_implemented)
   end

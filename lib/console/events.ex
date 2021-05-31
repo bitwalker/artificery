@@ -43,7 +43,7 @@ defmodule Artificery.Console.Events do
     # is changed. The default action is to ignore it.
     # If a program does full-screen display, it should handle SIGWINCH. When the signal
     # arrives, it should fetch the new screen size and reformat its display accordingly.
-    notify(subscribers, :sigwinch)
+    :ok = notify(subscribers, :sigwinch)
     {:ok, subscribers}
   end
   def handle_event(_, subscribers), do: {:ok, subscribers}
@@ -69,7 +69,7 @@ defmodule Artificery.Console.Events do
 
   @impl :gen_event
   def handle_info({:DOWN, _ref, _type, pid, _reason}, subscribers) do
-    {:noreply, Map.delete(subscribers, pid)}
+    {:ok, Map.delete(subscribers, pid)}
   end
 
   @impl :gen_event
@@ -87,5 +87,7 @@ defmodule Artificery.Console.Events do
     for {pid, _} <- subscribers do
       send(pid, {:event, event})
     end
+
+    :ok
   end
 end
