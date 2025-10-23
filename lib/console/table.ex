@@ -58,7 +58,7 @@ defmodule Artificery.Console.Table do
   defp stringify([], acc), do: Enum.reverse(acc)
   defp stringify([row | rest], acc), do: stringify(rest, [Enum.map(row, &to_string/1) | acc])
 
-  defp transpose(rows), do: rows |> List.zip() |> Enum.map(&Tuple.to_list/1)
+  defp transpose(rows), do: rows |> Enum.zip() |> Enum.map(&Tuple.to_list/1)
 
   defp column_widths(cols) do
     Enum.map(cols, fn c -> c |> Enum.map(&byte_size/1) |> Enum.max() end)

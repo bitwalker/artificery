@@ -586,7 +586,7 @@ defmodule Artificery.Entry do
           items
           |> Enum.map(&Tuple.to_list/1)
           |> Enum.map(fn cols -> Enum.map(cols, &byte_size/1) end)
-          |> List.zip()
+          |> Enum.zip()
           |> Enum.map(&Tuple.to_list/1)
 
         acc = :erlang.make_tuple(length(cols), 0)
