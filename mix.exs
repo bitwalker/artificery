@@ -14,6 +14,10 @@ defmodule Artificery.MixProject do
       description: description(),
       package: package(),
       elixirc_paths: elixirc_paths(Mix.env),
+      dialyzer: [
+        flags: ["-Wunmatched_returns", :error_handling, :race_conditions, :underspecs],
+        plt_add_apps: [:mix]
+      ],
       preferred_cli_env: [
         docs: :docs,
         "hex.publish": :docs,
@@ -28,6 +32,7 @@ defmodule Artificery.MixProject do
 
   defp deps do
     [
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:ex_doc, ">= 0.0.0", only: [:docs], runtime: false},
       {:eqc_ex, "~> 1.4", only: [:test], runtime: false}
     ]
@@ -55,5 +60,6 @@ defmodule Artificery.MixProject do
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:dev), do: ["lib", "test/artificery/dummy"]
   defp elixirc_paths(_), do: ["lib"]
 end

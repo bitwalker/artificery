@@ -31,6 +31,7 @@ defmodule Artificery.Entry do
       Handles parsing and validating arguments, then dispatching the selected
       command.
       """
+      @spec main() :: no_return()
       def main() do
         argv =
           :init.get_plain_arguments()
@@ -42,6 +43,7 @@ defmodule Artificery.Entry do
       end
 
       @doc false
+      @spec main(OptionParser.argv()) :: no_return()
       def main(argv) when is_list(argv) do
         Console.init()
 
@@ -88,7 +90,7 @@ defmodule Artificery.Entry do
           |> Enum.map(fn {name, val} -> {name, apply_transform(@global_options[name], val)} end)
           |> Map.new()
 
-        Console.configure(verbosity: Map.get(global_flags, :verbose, :normal))
+        _ = Console.configure(verbosity: Map.get(global_flags, :verbose, :normal))
 
         case argv do
           [] ->
@@ -285,18 +287,7 @@ defmodule Artificery.Entry do
       end
 
       defp dispatch(%Command{name: command_name, callback: callback} = command, argv, flags) do
-        new_flags =
-          case __MODULE__.pre_dispatch(command, argv, flags) do
-            {:ok, new_flags} ->
-              new_flags
-
-            other ->
-              Console.error(
-                "Expected {:ok, options} returned from #{__MODULE__}.pre_dispatch/3, got: #{
-                  inspect(other)
-                }"
-              )
-          end
+        {:ok, new_flags} = __MODULE__.pre_dispatch(command, argv, flags)
 
         if function_exported?(__MODULE__, callback, 2) do
           apply(__MODULE__, callback, [argv, new_flags])
@@ -321,6 +312,7 @@ defmodule Artificery.Entry do
         end
       end
 
+      @spec print_help(list(String.t())) :: no_return()
       defp print_help([]) do
         # Print global help
 
@@ -343,7 +335,7 @@ defmodule Artificery.Entry do
 
         for {flag, help} <- global_options do
           IO.write([flag, String.duplicate(" ", max(flag_width - byte_size(flag) + 2, 2))])
-          print_help_lines(help, flag_width + 2)
+          :ok = print_help_lines(help, flag_width + 2)
         end
 
         IO.write([?\n, "COMMANDS\n\n"])
@@ -452,14 +444,14 @@ defmodule Artificery.Entry do
 
           for {flag, help} <- options do
             IO.write([flag, String.duplicate(" ", max(flag_width - byte_size(flag) + 2, 2))])
-            print_help_lines(help, flag_width + 2)
+            :ok = print_help_lines(help, flag_width + 2)
           end
 
           if has_args?, do: IO.write("\n")
         end
 
         # Print arguments
-        if has_args? do
+        _ = if has_args? do
           IO.write("ARGUMENTS\n")
 
           arguments = format_arguments(cmd.arguments)
@@ -467,7 +459,7 @@ defmodule Artificery.Entry do
 
           for {arg, help} <- arguments do
             IO.write([arg, String.duplicate(" ", max(arg_width - byte_size(arg) + 2, 2))])
-            print_help_lines(help, arg_width + 2)
+            :ok = print_help_lines(help, arg_width + 2)
           end
         end
 
@@ -500,6 +492,8 @@ defmodule Artificery.Entry do
         for line <- rest do
           IO.write([String.duplicate(" ", leading_width), line, ?\n])
         end
+
+        :ok
       end
 
       defp format_arguments(args) do

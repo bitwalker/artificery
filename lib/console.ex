@@ -13,11 +13,8 @@ defmodule Artificery.Console do
   @doc """
   Terminates the process with the given status code.
   """
-  @spec halt(non_neg_integer) :: :ok | no_return
-  def halt(code)
-
-  def halt(0), do: :ok
-  def halt(code) when code > 0 do
+  @spec halt(non_neg_integer()) :: no_return()
+  def halt(code) do
     if Application.get_env(:artificery, :no_halt, false) do
       # During tests we don't want to kill the node process,
       # exit the test process instead.
@@ -277,14 +274,14 @@ defmodule Artificery.Console do
   @spec init() :: :ok
   def init do
     # For logger state
-    :ets.new(__MODULE__, [:public, :set, :named_table])
+    __MODULE__ = :ets.new(__MODULE__, [:public, :set, :named_table])
     # Start listening for console events
     Events.start
     :ok
   end
 
   @doc false
-  @spec width() :: non_neg_integer
+  @spec width() :: pos_integer()
   def width do
     case :io.columns() do
       {:error, :enotsup} -> 80
