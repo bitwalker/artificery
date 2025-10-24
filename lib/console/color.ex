@@ -4,11 +4,6 @@ defmodule Artificery.Console.Color do
   defmodule ANSI do
     @moduledoc false
 
-    require IO.ANSI.Sequence
-    import IO.ANSI.Sequence
-
-    defsequence :grey, 37
-
     @ansi_pattern Enum.join([
         "[\\e\\x{c29B}][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\\a)",
         "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
@@ -44,7 +39,7 @@ defmodule Artificery.Console.Color do
     do_style(styles ++ [:dim], acc, grey?)
   end
   defp do_style([grey | styles], acc, _grey?) when grey in [:gray, :grey] do
-    do_style(styles, [ANSI.grey | acc], true)
+    do_style(styles, [IO.ANSI.white | acc], true)
   end
   defp do_style([style | styles], acc, grey?) do
     do_style(styles, [apply(IO.ANSI, style, []) | acc], grey?)
